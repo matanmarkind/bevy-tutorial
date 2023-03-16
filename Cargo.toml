@@ -6,7 +6,11 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+# Use bevy 0.9 due to dependency issues with `bevy-inspector-egui`.
 bevy = { version = "0.10.0", features = ["dynamic_linking"] }
+bevy-inspector-egui = "0.18.0"
+bevy_prototype_debug_lines = { version = "0.10.1", features = ["3d"] }
+
 
 # Enable a small amount of optimization in debug mode
 [profile.dev]

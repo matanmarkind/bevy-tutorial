@@ -1,6 +1,7 @@
 use crate::bullet::*;
 use crate::components::*;
 use crate::resources::*;
+use crate::target::*;
 
 use bevy::prelude::*;
 use bevy::utils::FloatOrd;
@@ -12,24 +13,15 @@ pub struct Tower {
     pub bullet_spawn_offset: Vec3,
 }
 
-#[derive(Debug, Bundle, Default)]
-pub struct TargetBundle {
-    pub velocity: Velocity,
-    pub health: Health,
-    pub target: Target,
-}
+pub struct TowerPlugin {}
 
-impl TargetBundle {
-    pub fn new(health: f32, velocity: Vec3, hitbox: f32) -> Self {
-        Self {
-            velocity: Velocity { val: velocity },
-            health: Health { val: health },
-            target: Target { hitbox },
-        }
+impl Plugin for TowerPlugin {
+    fn build(&self, app: &mut App) {
+        app.register_type::<Tower>().add_system(tower_shooting);
     }
 }
 
-pub fn tower_shooting(
+fn tower_shooting(
     mut commands: Commands,
     mut towers: Query<(Entity, &mut Tower, &GlobalTransform)>,
     targets: Query<&GlobalTransform, With<Target>>,

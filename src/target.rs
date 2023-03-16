@@ -2,7 +2,38 @@ use crate::components::*;
 
 use bevy::prelude::*;
 
-pub fn update_targets(
+#[derive(Debug, Component, Default, Reflect)]
+#[reflect(Component)]
+pub struct Target {
+    pub hitbox: f32,
+}
+
+#[derive(Debug, Bundle, Default)]
+pub struct TargetBundle {
+    pub velocity: Velocity,
+    pub health: Health,
+    pub target: Target,
+}
+
+impl TargetBundle {
+    pub fn new(health: f32, velocity: Vec3, hitbox: f32) -> Self {
+        Self {
+            velocity: Velocity { val: velocity },
+            health: Health { val: health },
+            target: Target { hitbox },
+        }
+    }
+}
+
+pub struct TargetPlugin {}
+
+impl Plugin for TargetPlugin {
+    fn build(&self, app: &mut App) {
+        app.register_type::<Target>().add_system(update_targets);
+    }
+}
+
+fn update_targets(
     mut commands: Commands,
     mut targets: Query<(Entity, &mut Transform, &Health, &Velocity), With<Target>>,
     time: Res<Time>,

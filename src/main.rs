@@ -23,16 +23,14 @@ fn main() {
             ..default()
         }))
         .add_plugin(DebugLinesPlugin::default())
-        // Inspector setup.
+        // Inspector requires that components are `reflect` and `register_type`.
         .add_plugin(WorldInspectorPlugin::new())
-        .register_type::<Tower>()
-        .register_type::<Lifetime>()
-        .register_type::<Target>()
-        .register_type::<Velocity>()
-        .register_type::<Bullet>()
+        .add_plugin(ComponentsPlugin {})
+        .add_plugin(BulletPlugin {})
+        .add_plugin(TargetPlugin {})
+        .add_plugin(TowerPlugin {})
         // Our system.
         .add_startup_systems((spawn_camera, spawn_basic_scene, load_assets, display_axes))
-        .add_systems((tower_shooting, update_bullets, update_targets))
         .run()
 }
 

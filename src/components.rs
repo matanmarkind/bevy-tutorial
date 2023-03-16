@@ -19,8 +19,12 @@ pub struct Velocity {
     pub val: Vec3,
 }
 
-#[derive(Debug, Component, Default, Reflect)]
-#[reflect(Component)]
-pub struct Target {
-    pub hitbox: f32,
+pub struct ComponentsPlugin {}
+
+impl Plugin for ComponentsPlugin {
+    fn build(&self, app: &mut App) {
+        app.register_type::<Lifetime>()
+            .register_type::<Health>()
+            .register_type::<Velocity>();
+    }
 }

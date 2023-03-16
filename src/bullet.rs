@@ -1,4 +1,5 @@
 use crate::components::*;
+use crate::target::*;
 
 use bevy::prelude::*;
 use bevy::utils::FloatOrd;
@@ -24,7 +25,15 @@ impl BulletBundle {
     }
 }
 
-pub fn update_bullets(
+pub struct BulletPlugin {}
+
+impl Plugin for BulletPlugin {
+    fn build(&self, app: &mut App) {
+        app.register_type::<Bullet>().add_system(update_bullets);
+    }
+}
+
+fn update_bullets(
     mut commands: Commands,
     mut bullets: Query<(
         Entity,

@@ -30,7 +30,9 @@ fn main() {
         .add_plugin(TargetPlugin {})
         .add_plugin(TowerPlugin {})
         // Our system.
-        .add_startup_systems((spawn_camera, spawn_basic_scene, load_assets, display_axes))
+        .add_startup_systems((load_assets,).in_base_set(StartupSet::PreStartup))
+        .add_startup_systems((spawn_camera, spawn_basic_scene, display_axes))
+        .add_system(camera_control)
         .run()
 }
 
@@ -38,6 +40,7 @@ fn spawn_basic_scene(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    assets: Res<GameAssets>,
 ) {
     commands
         .spawn(PbrBundle {
@@ -51,15 +54,14 @@ fn spawn_basic_scene(
         .insert(Name::new("Ground"));
 
     commands
-        .spawn(PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
-            material: materials.add(Color::rgb(0.67, 0.84, 0.92).into()),
-            transform: Transform::from_xyz(0.0, 0.5, 0.0),
+        .spawn(SceneBundle {
+            scene: assets.tower_scene.clone(),
+            transform: Transform::from_xyz(0.0, 0.0, 0.0),
             ..default()
         })
         .insert(Tower {
             shooting_timer: Timer::from_seconds(0.1, TimerMode::Repeating),
-            bullet_spawn_offset: Vec3::new(0.0, 0.2, 0.5),
+            bullet_spawn_offset: Vec3::new(0.0, 1.4, 0.0),
         })
         .insert(Name::new("Tower"));
 
@@ -82,9 +84,8 @@ fn spawn_basic_scene(
         Transform::from_xyz(-2.0, 0.2, 1.5),
     ] {
         commands
-            .spawn(PbrBundle {
-                mesh: meshes.add(Mesh::from(shape::Cube { size: 0.4 })),
-                material: materials.add(Color::rgb(0.67, 0.84, 0.92).into()),
+            .spawn(SceneBundle {
+                scene: assets.target_scene.clone(),
                 transform: location,
                 ..default()
             })
@@ -104,9 +105,49 @@ fn spawn_camera(mut commands: Commands) {
     });
 }
 
+fn camera_control(
+    keyboard: Res<Input<KeyCode>>,
+    mut camera_query: Query<&mut Transform, With<Camera3d>>,
+    time: Res<Time>,
+) {
+    let mut camera = camera_query.single_mut();
+
+    let mut forward = camera.forward();
+    forward.y = 0.0; // Remove tilt so we will move parallel to the ground.
+    forward = forward.normalize();
+    let mut left = camera.left();
+    left.y = 0.0; // Remove tilt so we will move parallel to the ground.
+    left = left.normalize();
+
+    let speed = 4.0;
+    let rotate_speed = 0.5;
+
+    if keyboard.pressed(KeyCode::W) {
+        camera.translation += forward * time.delta_seconds() * speed;
+    }
+    if keyboard.pressed(KeyCode::S) {
+        camera.translation -= forward * time.delta_seconds() * speed;
+    }
+    if keyboard.pressed(KeyCode::A) {
+        camera.translation += left * time.delta_seconds() * speed;
+    }
+    if keyboard.pressed(KeyCode::D) {
+        camera.translation -= left * time.delta_seconds() * speed;
+    }
+    if keyboard.pressed(KeyCode::Q) {
+        camera.rotate_axis(Vec3::Y, rotate_speed * time.delta_seconds());
+    }
+    if keyboard.pressed(KeyCode::E) {
+        camera.rotate_axis(Vec3::Y, -rotate_speed * time.delta_seconds());
+    }
+}
+
 fn load_assets(mut commands: Commands, assets: Res<AssetServer>) {
     commands.insert_resource(GameAssets {
-        bullet_scene: assets.load("Bullet.glb#Scene0"),
+        tower_base_scene: assets.load("TowerBase.glb#Scene0"),
+        tower_scene: assets.load("TomatoTower.glb#Scene0"),
+        tomato_scene: assets.load("Tomato.glb#Scene0"),
+        target_scene: assets.load("Target.glb#Scene0"),
     });
 }
 

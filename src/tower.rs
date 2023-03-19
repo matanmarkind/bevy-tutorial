@@ -48,7 +48,7 @@ fn tower_shooting(
         commands.entity(entity).with_children(|child_builder| {
             child_builder
                 .spawn(SceneBundle {
-                    scene: bullet_assets.bullet_scene.clone(),
+                    scene: bullet_assets.tomato_scene.clone(),
                     // Since spawning as a child, give the transform relative to the parent.
                     // https://bevy-cheatbook.github.io/features/transforms.html#transform
                     transform: Transform::from_translation(tower.bullet_spawn_offset),

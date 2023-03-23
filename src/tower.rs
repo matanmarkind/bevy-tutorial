@@ -5,6 +5,7 @@ use crate::target::*;
 
 use bevy::prelude::*;
 use bevy::utils::FloatOrd;
+use bevy_rapier3d::prelude::*;
 
 #[derive(Debug, Component, Default, Reflect)]
 #[reflect(Component)]
@@ -57,6 +58,12 @@ fn tower_shooting(
                 .insert(BulletBundle::new(direction * speed, damage))
                 .insert(Lifetime {
                     timer: Timer::from_seconds(10.0, TimerMode::Once),
+                })
+                .insert(RigidBody::Fixed) // Seems needed for the Collider transform.
+                .with_children(|child_cmd| {
+                    child_cmd
+                        .spawn(Collider::ball(0.07))
+                        .insert(Name::new("Hitbox"));
                 })
                 .insert(Name::new("Bullet"));
         });
